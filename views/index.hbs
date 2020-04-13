@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html style="zoom:80%;">
+<head>
+    <meta charset="utf-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="/styles/styles.css">
+    <title>RGPV ResultSheet</title>
+</head>
+      
+ 
+<body>
+<div  style="
+background: linear-gradient(#ffe259, #ffa751) no-repeat;
+      background-position: center;
+      width:100%;
+      height:100%;
+      background-size:100%;
+	  position:absolute;
+"
+>
+<p style="font-size:39px; background:red; color:white;">{{error}}</p>
+<div class="container"
+     style=" background-color:rgba(256,256,256,0.7);
+    position:absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%,-50%);
+    box-shadow: 0px 5px 7px rgba(0,0,0,0.8);
+    border-radius: 8px;
+    max-width: 500px;
+    padding:50px;
+">
+    <div class="row justify-content-center align-items-center">
+        <div class="col-md-6" style="min-width: 100%;">
+            <form id="form" method="POST" action="/data">
+                <div class="form-group">
+                    <label for="startingBit" class="text-center" >Starting Bit </label>
+                    <input type="text" class="form-control" id="startingBit" name="startingBit" placeholder="Enter Starting Bit (ex: 0103,0176)" required>
+                </div>
+                <div class="form-group">
+                    <label for="branch">Branch </label>
+                    <input type="text" class="form-control" id="branch" name="branch" placeholder="Enter the Branch acronym (ex: CS,ME)" required>
+                </div>
+				 <div class="form-group">
+                    <label for="midBit" class="text-center" >Mid Bit</label>
+                    <input type="text" class="form-control" id="midBit" name="midBit" placeholder="Enter Mid Bit (ex: 18)" required>
+                </div>
+                <div class="form-group">
+                    <label for="rollNoS">Roll No. Start </label>
+                    <input type="text" class="form-control" id="rollNoS" name="rollNoS" placeholder="Enter the 4-digit rollNo to start from (ex. 0000,1001) " required>
+                </div>
+				<div class="form-group">
+                    <label for="rollNoE">Roll No. End </label>
+                    <input type="text" class="form-control" id="rollNoE" name="rollNoE" placeholder="Enter the 4-digit rollNo to end to (ex. 1180,1103) " required>
+                </div>
+				<div class="form-group">
+                    <label for="semester">Semester</label>
+                    <input type="number" class="form-control" id="semester" name="semester" placeholder="Enter the semester" required>
+                </div>
+				<div class="form-group">
+                    <label for="apiKey">API KEY</label>
+                    <input type="text" class="form-control" id="apiKey" name="apiKey" placeholder="Enter the API Key" required autocomplete="off"> 
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">Submit</button>
+            </form>
+        </div>
+    </div>
+</div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+<script src="/socket.io/socket.io.js"></script>
+<script>
+    $(function () {
+        $('[data-toggle="popover"]').popover()
+    });
+    $('.popover-dismiss').popover({
+        trigger: 'focus'
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+	<title>Result Sheet</title>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<!--===============================================================================================-->
+	<link rel="icon" type="image/png" href="images/icons/favicon.ico" />
+	<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="vendor/bootstrap/css/bootstrap.min.css">
+	<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="fonts/font-awesome-4.7.0/css/font-awesome.min.css">
+	<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="vendor/animate/animate.css">
+	<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="vendor/select2/select2.min.css">
+	<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="vendor/perfect-scrollbar/perfect-scrollbar.css">
+	<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="css/util.css">
+	<link rel="stylesheet" type="text/css" href="css/main.css">
+</head>
+
+<body
+style="
+    display: flex;
+    height: 100%;
+    align-items: center;
+    flex-direction: column;
+"
+>
+<div>
+<button class='btn btn-info'  id = 'fetchRemainingButton' disabled = true onclick="fetchRemaining();"
+style ="
+    font-size: 27px;
+    align-self: center;
+"
+>Please Wait</button>
+<h3 id='total' class='btn btn-outline-secondary'
+style ="
+    font-size: 27px;
+    align-self: center;
+"
+>Total : 0/0</h3>
+<button class='btn btn-outline-success' id='download' onclick="downloadCSV();"
+style ="
+    font-size: 27px;
+    align-self: center;
+"
+>Download CSV File</button>
+</div>
+	<div class="limiter">
+		<div class="container-table100">
+			<div class="wrap-table100">
+				<div class="table100 ver1 m-b-110">
+					<div class="table100-head">
+						<table>
+							<thead>
+								<tr class="row100 head">
+									<th class="cell100 column1">Enrollment No</th>
+									<th class="cell100 column2">Name</th>
+									<th class="cell100 column3">Course</th>
+									<th class="cell100 column4">SGPA</th>
+									<th class="cell100 column5">CGPA</th>
+									<th class="cell100 column6">Result</th>
+									<th class="cell100 column7">Refresh</th>
+								</tr>
+							</thead>
+						</table>
+					</div>
+
+					<div class="table100-body js-pscroll">
+						<table id='data'>
+							<tbody>
+							</tbody>
+						</table>
+					</div>
+				</div>
+
+				<script src="/socket.io/socket.io.js"></script>
+				<!--===============================================================================================-->
+				<script src="vendor/jquery/jquery-3.2.1.min.js"></script>
+				<!--===============================================================================================-->
+				<script src="vendor/bootstrap/js/popper.js"></script>
+				<script src="vendor/bootstrap/js/bootstrap.min.js"></script>
+				<!--===============================================================================================-->
+				<script src="vendor/select2/select2.min.js"></script>
+				<!--===============================================================================================-->
+				<script src="vendor/perfect-scrollbar/perfect-scrollbar.min.js"></script>
+				<script>
+					$('.js-pscroll').each(function () {
+						var ps = new PerfectScrollbar(this);
+
+						$(window).on('resize', function () {
+							ps.update();
+						})
+					});
+
+
+				</script>
+				<script>
+					var total=0;
+					var socket = io();
+					socket.on('connect', function () {
+						console.log('Connected to server');
+					});
+					socket.on('getTotal',function(t){
+					total = t;
+					console.log('getTotal was fired!!')
+					setTotalLabel(0,total);
+					})
+					var current=0;
+					var set = [];
+					var indices = [];
+					var dataDownload= {};
+					var btnR = document.getElementById("fetchRemainingButton");
+					(function ($) {
+						"use strict";
+						$('.column100').on('mouseover', function () {
+							var table1 = $(this).parent().parent().parent();
+							var table2 = $(this).parent().parent();
+							var verTable = $(table1).data('vertable') + "";
+							var column = $(this).data('column') + "";
+
+							$(table2).find("." + column).addClass('hov-column-' + verTable);
+							$(table1).find(".row100.head ." + column).addClass('hov-column-head-' + verTable);
+						});
+
+						$('.column100').on('mouseout', function () {
+							var table1 = $(this).parent().parent().parent();
+							var table2 = $(this).parent().parent();
+							var verTable = $(table1).data('vertable') + "";
+							var column = $(this).data('column') + "";
+
+							$(table2).find("." + column).removeClass('hov-column-' + verTable);
+							$(table1).find(".row100.head ." + column).removeClass('hov-column-head-' + verTable);
+						});
+
+
+					})(jQuery);
+					socket.on("getSet", function(data){
+						 set = data;
+						 getResult();
+						}
+					)
+					function getResult(){
+					socket.emit('getResult',set.splice(0,set.length>5?5:set.length));;
+				}
+				var remainingSet = []
+				function getRemaining(){
+					var sl = remainingSet.splice(0,remainingSet.length>5? 5 : remainingSet.length);
+					console.log('--------------Remaining Set -------------------'+sl.length);
+					for(var i = 0 ; i < sl.length ; i++)
+					refresh({id:sl[i]});
+				}
+				var i = 1;
+				var j = 1;
+					socket.on('newEntry', function (data) {
+						var el;
+						if(data.name!='NA'){
+						el = "<tr class='row100 body' id='"+data.rollNo+"'><td class='cell100 column1'>" + data.rollNo + "</td><td class='cell100 column2'>" + data.name + "</td><td class='cell100 column3'>" + data.course + "</td><td class='cell100 column4'>" + data.sgpa + "</td><td class='cell100 column5'>" + data.cgpa + "</td><td class='cell100 column6'>" + data.result + "</td><td><button id='"+data.rollNo+"2'class='btn btn-primary' onclick='refresh(this);' disabled='true'>Refresh</button></td></tr>"
+						current++;
+						indices.push(data.rollNo);
+						dataDownload[data.rollNo]=data;
+						setTotalLabel(current,total);
+						}else
+						el = "<tr class='row100 body' id='"+data.rollNo+"'><td class='cell100 column1'>" + data.rollNo + "</td><td class='cell100 column2'>" + data.name + "</td><td class='cell100 column3'>" + data.course + "</td><td class='cell100 column4'>" + data.sgpa + "</td><td class='cell100 column5'>" + data.cgpa + "</td><td class='cell100 column6'>" + data.result + "</td><td><button id='"+data.rollNo+"2'class='btn btn-primary' onclick='refresh(this);'>Refresh</button></td></tr>"						
+						$('#data > tbody:last-child').append(el);
+						if(set.length>0 && i%5==0 )
+						getResult();
+						if(i==total){
+						btnR.disabled = false;
+						btnR.innerText = 'Fetch Remaining'
+							}
+						i++;
+					});
+					socket.on('refreshEntry',function(data){
+						if(data.name!='NA'){
+					    var tr = document.getElementById(data.rollNo);
+						//console.log(tr,data.rollNo);
+						var el = "<td class='cell100 column1'>" + data.rollNo + "</td><td class='cell100 column2'>" + data.name + "</td><td class='cell100 column3'>" + data.course + "</td><td class='cell100 column4'>" + data.sgpa + "</td><td class='cell100 column5'>" + data.cgpa + "</td><td class='cell100 column6'>" + data.result + "</td><td><button id='"+data.rollNo+"2'class='btn btn-primary' onclick='refresh(this);' disabled='true'>Refresh</button></td>";
+						tr.innerHTML = el;
+						current++;
+						setTotalLabel(current,total);
+						indices.push(data.rollNo);
+						dataDownload[data.rollNo]=data;
+						}
+						else{
+						var tr = document.getElementById(data.rollNo+'2');
+						tr.disabled = false;
+						}
+						if(j%5==0)
+							getRemaining();
+						if(remainingSet.length == 0)
+							btnR.disabled = false;
+						j++;
+					})
+					function refresh(event){
+						var id = (event.id);
+						id = id.slice(0,id.length-1);
+						console.log("------------singleFetch-------------- "+id);
+						socket.emit("singleFetch",{
+						rollNo:id
+						});
+						var tr = document.getElementById(event.id);
+						tr.disabled = true;
+					}
+					function setTotalLabel(cur,t){
+					var el = document.getElementById('total');
+					el.innerText = 'Total : '+cur+'/'+t;
+					
+					}
+					socket.on('disconnect', function () {
+						console.log('Disconnected from server');
+					});
+					
+					function fetchRemaining(){
+					console.log("--------MultiFetch----------");
+					btnR.disabled = true;
+					var buttons = document.querySelectorAll('td button');
+					buttons.forEach(button=>{
+					if(!button.disabled){
+					{
+					var event = button.id;
+					remainingSet.push(event);
+					}
+					}
+					})
+					getRemaining();
+					}
+					
+					function downloadCSV(){
+					var d = document.getElementById('download');
+					var keys = Object.keys(dataDownload[indices[0]]);
+					var csv = keys.join(',') + '\n';
+					d.disabled = true;
+					indices.sort();
+					for(var i = 0; i<indices.length; i++){
+						var index = indices[i];
+						var dataIndividualCSV = '';
+						for(let key of keys)
+							dataIndividualCSV += dataDownload[index][key] + ',';
+						dataIndividualCSV = dataIndividualCSV.slice(0,dataIndividualCSV.length - 1) + '\n';
+						csv+=dataIndividualCSV;
+					}
+						saveAs("data:text/csv;charset=utf-8," + escape(csv),'resultSheet.csv');
+						d.disabled = false;
+					}
+					
+					function saveAs(uri, filename) {
+					  var link = document.createElement('a');
+					  if (typeof link.download === 'string') {
+						link.href = uri;
+						link.download = filename;
+						document.body.appendChild(link);
+						link.click();
+						document.body.removeChild(link);
+					  } else {
+						window.open(uri);
+					  }
+					}
+					
+				</script>
+</body>
+
+</html>
